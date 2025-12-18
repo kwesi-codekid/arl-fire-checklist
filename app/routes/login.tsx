@@ -19,17 +19,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
     await connectDB();
     const formData = await request.formData();
-    const name = formData.get('name') as string;
+    const employeeId = formData.get('employeeId') as string;
 
-    if (!name || name.trim() === '') {
-        return { error: 'Please enter your name' };
+    if (!employeeId || employeeId.trim() === '') {
+        return { error: 'Please enter your employee ID' };
     }
 
     try {
-        let user = await User.findOne({ name });
+        const user = await User.findOne({ employeeId });
         if (!user) {
-            user = new User({ name, role: 'inspector' });
-            await user.save();
+            return { error: 'Employee ID not found. Please contact your administrator.' };
         }
 
         const session = await getSession(request.headers.get("Cookie"));
@@ -48,7 +47,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Login() {
     const actionData = useActionData() as { error?: string } | undefined;
-    const [name, setName] = useState('');
+    const [employeeId, setEmployeeId] = useState('');
 
     useEffect(() => {
         if (actionData?.error) {
@@ -74,17 +73,17 @@ export default function Login() {
                     {/* Login Form using React Router Form */}
                     <Form method="post" className="space-y-6">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
-                                Inspector Name
+                            <label htmlFor="employeeId" className="block text-sm font-semibold text-slate-700 mb-2">
+                                Employee ID
                             </label>
                             <input
                                 type="text"
-                                id="name"
-                                name="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                id="employeeId"
+                                name="employeeId"
+                                value={employeeId}
+                                onChange={(e) => setEmployeeId(e.target.value)}
                                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-gold-500 focus:ring-4 focus:ring-gold-100 outline-none transition-all"
-                                placeholder="Enter your name"
+                                placeholder="Enter your employee ID"
                                 autoFocus
                             />
                         </div>

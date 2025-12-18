@@ -45,6 +45,7 @@ export interface InspectionReport {
 
 export interface User {
   id: string;
+  employeeId: string;
   name: string;
   role: 'inspector' | 'admin';
 }
