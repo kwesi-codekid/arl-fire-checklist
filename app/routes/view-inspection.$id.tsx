@@ -1,7 +1,9 @@
 import React from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
-import { ArrowLeft, Printer, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Download, CheckCircle, XCircle } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { COMPANY_NAME, FORM_TITLE } from '../constants';
 import { InspectionStatus, type InspectionReport } from '../types';
 import { Inspection } from '../db/models/Inspection';
@@ -31,8 +33,49 @@ export default function ViewInspection() {
     const { report } = useLoaderData() as { report: InspectionReport };
     const navigate = useNavigate();
 
-    const handlePrint = () => {
-        window.print();
+    const handleDownload = async () => {
+        const element = document.getElementById('report-content');
+        if (!element) return;
+
+        try {
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                logging: false,
+                useCORS: true
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pageWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgWidth = pageWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            // Add first page
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add additional pages if content is longer than one page
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save(`Inspection-Report-${report.header.vehicleReg}-${report.header.date}.pdf`);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Failed to generate PDF. Please try again.');
+        }
     };
 
     return (
@@ -45,14 +88,14 @@ export default function ViewInspection() {
                     <ArrowLeft size={20} /> Back to Dashboard
                 </button>
                 <button
-                    onClick={handlePrint}
+                    onClick={handleDownload}
                     className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700"
                 >
-                    <Printer size={20} /> Print Report
+                    <Download size={20} /> Download Report
                 </button>
             </div>
 
-            <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border-t-8 border-nzema-red print:shadow-none print:border-none print:p-0">
+            <div id="report-content" className="bg-white p-8 md:p-12 rounded-xl shadow-lg border-t-8 border-nzema-red print:shadow-none print:border-none print:p-0">
 
                 {/* Header Section */}
                 <div className="text-center space-y-2 border-b-2 border-slate-800 pb-6 mb-8">
