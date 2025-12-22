@@ -55,7 +55,7 @@ export default function NewInspection() {
         inspectorName: user.name || '',
         isCompleted: false,
         header: {
-            vehicleReg: 'WR 1838-11',
+            vehicleReg: '',
             date: new Date().toISOString().split('T')[0],
             roadWorthiness: 'Valid',
             insurance: 'Valid',
@@ -252,6 +252,7 @@ export default function NewInspection() {
                         >
                             <option value="" disabled>Select Vehicle</option>
                             <option value="WR 1838-11">WR 1838-11</option>
+                            <option value="ER 2346-11">ER 2346-11</option>
                         </select>
                     </div>
                     <div>

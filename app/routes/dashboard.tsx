@@ -21,6 +21,7 @@ export default function Dashboard() {
     const { inspections } = useLoaderData() as { inspections: any[] };
     const [searchTerm, setSearchTerm] = useState('');
     const [crewFilter, setCrewFilter] = useState('All');
+    const [vehicleFilter, setVehicleFilter] = useState('All');
 
     const filteredInspections = inspections.filter(inspection => {
         const matchesSearch =
@@ -28,8 +29,9 @@ export default function Dashboard() {
             (inspection.inspectorName?.toLowerCase().includes(searchTerm.toLowerCase()) || '');
 
         const matchesCrew = crewFilter === 'All' || inspection.header?.crew === crewFilter;
+        const matchesVehicle = vehicleFilter === 'All' || inspection.header?.vehicleReg === vehicleFilter;
 
-        return matchesSearch && matchesCrew;
+        return matchesSearch && matchesCrew && matchesVehicle;
     });
 
     return (
@@ -68,27 +70,34 @@ export default function Dashboard() {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
                 <div className="p-6 border-b border-slate-100 bg-white sticky top-20 z-30">
                     <h2 className="text-lg font-bold text-slate-800 mb-4">Recent Inspections</h2>
-                    <div className="flex justify-between items-center gap-4">
-                        <div className="relative">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3">
+                        <select
+                            value={vehicleFilter}
+                            onChange={(e) => setVehicleFilter(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-nzema-red focus:ring-1 focus:ring-nzema-red text-sm bg-white"
+                        >
+                            <option value="All">All Vehicles</option>
+                            <option value="WR 1838-11">WR 1838-11</option>
+                            <option value="ER 2346-11">ER 2346-11</option>
+                        </select>
+                        <div className="relative flex-1">
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-nzema-red focus:ring-1 focus:ring-nzema-red text-sm w-40 md:w-64"
+                                className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-nzema-red focus:ring-1 focus:ring-nzema-red text-sm w-full"
                             />
                         </div>
-                        <div>
-                            <select
-                                value={crewFilter}
-                                onChange={(e) => setCrewFilter(e.target.value)}
-                                className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-nzema-red focus:ring-1 focus:ring-nzema-red text-sm bg-white w-auto"
-                            >
-                                <option value="All">All Crews</option>
-                                <option value="Day Crew">Day Crew</option>
-                                <option value="Night Crew">Night Crew</option>
-                            </select>
-                        </div>
+                        <select
+                            value={crewFilter}
+                            onChange={(e) => setCrewFilter(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-nzema-red focus:ring-1 focus:ring-nzema-red text-sm bg-white"
+                        >
+                            <option value="All">All Crews</option>
+                            <option value="Day Crew">Day Crew</option>
+                            <option value="Night Crew">Night Crew</option>
+                        </select>
                     </div>
                 </div>
 
